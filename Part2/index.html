@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars</title>
+</head>
+<body>
+    <h1>Cars</h1>
+    <label for="">Model</label>
+    <input type="text" id="cmodel"/><br/>
+    <label for="">license Number</label>
+    <input type="text" id="clicense"/><br/>
+    <button onclick="addCar();">Add</button>
+    <div id="data"></div>
+    <script>
+        async function addCar(){
+            const cmodel = document.getElementById("cmodel").value;
+            const clicense = document.getElementById("clicense").value;
+            const body = {
+                model:cmodel,
+                license_Number:Number(clicense)
+            }
+
+            await fetch("http://localhost:8080/cars/add",{
+                method:"POST",
+                headers:{
+                    "content-type":"application/json"
+                },
+                body:JSON.stringify(body)
+            })
+
+            showAllCars();
+        }
+
+        async function showAllCars(){
+            let res = await fetch("http://localhost:8080/cars/showall")
+            let resBody = await res.json();
+            let cars = resBody.data;
+            let html = "";
+            let carsHtml = cars.map(car => `<tr>
+                <td>${car.id}</td>
+                <td>${car.model}</td>
+                <td>${car.license_Number}</td>
+                <td><button onclick="deleteCar('${car.id}')">Delete</button></td>
+                </tr>`)
+            html = "<table><tr><th>id</th><th>Model</th><th>license Number</th></tr>"+carsHtml.join("\r\n")+"</table>"
+
+            document.getElementById("data").innerHTML=html;
+
+        }
+
+        async function deleteCar(id){
+            let res = await fetch("http://localhost:8080/cars/delete/"+id);
+            let resBody = await res.json();
+
+            alert(resBody.msg);
+            showAllCars();
+        }
+
+        showAllCars();
+    </script>
+</body>
+</html>
